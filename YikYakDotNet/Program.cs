@@ -11,7 +11,7 @@ namespace YikYakDotNet
         static void Main(string[] args)
         {
             YikYakAPI api = new YikYakAPI();
-            api.Execute();
+            var res = api.GetMessages(38.832194, -77.308037);
         }
     }
 }
