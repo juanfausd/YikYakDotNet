@@ -21,7 +21,7 @@ namespace YikYakDotNet
     {
         private const string GET_MESSAGES_URL = "/api/getMessages?lat={latitude}&long={longitude}&userID={user-id}";
         private const string REGISTER_USER_URL = "/api/registerUser?lat={latitude}&long={longitude}&userID={user-id}";
-        private const string USER_AGENT = "Mozilla/5.1 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19";
+        private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; Google Nexus 4 - 4.4.4 - API 19 - 768x1280 Build/KTU84P)";
         private const string DEVICE_KEY = "35FD04E8-B7B1-45C4-9886-94A75F4A2BB4";
 
         public string GetMessages(double latitude, double longitude)
@@ -53,6 +53,7 @@ namespace YikYakDotNet
             HttpWebRequest regRequest = WebRequest.Create(regUrl) as HttpWebRequest;
             regRequest.Method = "GET";
             regRequest.UserAgent = USER_AGENT;
+            regRequest.Timeout = 3000;
             HttpWebResponse regResponse = (HttpWebResponse)regRequest.GetResponse();
         }
 
@@ -73,6 +74,7 @@ namespace YikYakDotNet
             HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
             request.Method = "GET";
             request.UserAgent = USER_AGENT;
+            request.Timeout = 10000;
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
             return Helpers.ReadWebResponse(response);
