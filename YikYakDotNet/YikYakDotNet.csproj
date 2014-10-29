@@ -44,10 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\RectangleSearchArea.cs" />
+    <Compile Include="Entities\Yak.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IYikYakAPI.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Statistics\GetMessagesResult.cs" />
+    <Compile Include="Statistics\IStatisticsManager.cs" />
+    <Compile Include="Statistics\LocationPoint.cs" />
+    <Compile Include="Statistics\StatisticsManager.cs" />
     <Compile Include="YikYakAPI.cs" />
   </ItemGroup>
   <ItemGroup>
