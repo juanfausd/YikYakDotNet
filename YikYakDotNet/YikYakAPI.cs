@@ -24,10 +24,18 @@ namespace YikYakDotNet
     {
         private const string GET_MESSAGES_URL = "/api/getMessages?lat={latitude}&long={longitude}&userID={user-id}&version={version}";
         private const string REGISTER_USER_URL = "/api/registerUser?lat={latitude}&long={longitude}&userID={user-id}&version={version}";
+        private const string PEEK_MESSAGES_URL = "/api/getPeekMessages?lat={latitude}&long={longitude}&userID={user-id}&peekID={peek-id}&version={version}";
+        private const string YAKS_URL = "/api/yaks?lat={latitude}&long={longitude}&userID={user-id}&userLat={user-latitude}&userLong={user-longitude}&version={version}";
         private const string BASE_URL = "https://us-east-api.yikyakapi.net";
         private const string USER_AGENT = "Yik Yak/2.1.0.23 CFNetwork/711.1.12 Darwin/14.0.0";
         private const string DEVICE_KEY = "F7CAFA2F-FE67-4E03-A090-AC7FFF010729";
         private const string VERSION = "2.1.003";
+
+        private string GenerateUserId()
+        {
+            //return userId = Helpers.CalculateMD5Hash(Guid.NewGuid().ToString());
+            return Guid.NewGuid().ToString().ToUpper();
+        }
 
         public List<Yak> GetYaks(double latitude, double longitude)
         {
@@ -87,11 +95,98 @@ namespace YikYakDotNet
             return result;
         }
 
+        public List<Location> GetFeaturedLocations(double latitude, double longitude)
+        {
+            return GetLocations(latitude, longitude, "featuredLocations");
+        }
+
+        public List<Location> GetFeaturedLocations(double latitude, double longitude, string userId, string salt)
+        {
+            return GetLocations(latitude, longitude, userId, salt, "featuredLocations");
+        }
+
+        public List<Location> GetOtherLocations(double latitude, double longitude)
+        {
+            return GetLocations(latitude, longitude, "otherLocations");
+        }
+
+        public List<Location> GetOtherLocations(double latitude, double longitude, string userId, string salt)
+        {
+            return GetLocations(latitude, longitude, userId, salt, "otherLocations");
+        }
+
+        public List<Location> GetLocations(double latitude, double longitude, string type)
+        {
+            string res = GetMessages(latitude, longitude);
+
+            var deserializerSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateParseHandling = Newtonsoft.Json.DateParseHandling.None,
+                DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc
+            };
+
+            JToken token = JsonConvert.DeserializeObject<JObject>(res, deserializerSettings);
+
+            List<Location> result = new List<Location>();
+
+            foreach (JToken locationToken in token[type])
+            {
+                Location location = new Location();
+                location.PeekID = locationToken["peekID"].ToString();
+                location.Name = locationToken["location"].ToString();
+                location.Inactive = locationToken["inactive"].ToString() == "1";
+                location.CanSubmit = locationToken["canSubmit"].ToString() == "1";
+                location.CanVote = locationToken["canVote"].ToString() == "1";
+                location.CanReply = locationToken["canReply"].ToString() == "1";
+                location.CanReport = locationToken["canReport"].ToString() == "1";
+                location.Latitude = double.Parse(locationToken["latitude"].ToString(), CultureInfo.InvariantCulture);
+                location.Longitude = double.Parse(locationToken["longitude"].ToString(), CultureInfo.InvariantCulture);
+                location.Delta = double.Parse(locationToken["delta"].ToString(), CultureInfo.InvariantCulture);
+                result.Add(location);
+            }
+
+            return result;
+        }
+
+        public List<Location> GetLocations(double latitude, double longitude, string userId, string salt, string type)
+        {
+            string res = GetMessages(latitude, longitude, userId, salt);
+
+            var deserializerSettings = new JsonSerializerSettings()
+            {
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateParseHandling = Newtonsoft.Json.DateParseHandling.None,
+                DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc
+            };
+
+            JToken token = JsonConvert.DeserializeObject<JObject>(res, deserializerSettings);
+
+            List<Location> result = new List<Location>();
+
+            foreach (JToken locationToken in token[type])
+            {
+                Location location = new Location();
+                location.PeekID = locationToken["peekID"].ToString();
+                location.Name = locationToken["location"].ToString();
+                location.Inactive = locationToken["inactive"].ToString() == "1";
+                location.CanSubmit = locationToken["canSubmit"].ToString() == "1";
+                location.CanVote = locationToken["canVote"].ToString() == "1";
+                location.CanReply = locationToken["canReply"].ToString() == "1";
+                location.CanReport = locationToken["canReport"].ToString() == "1";
+                location.Latitude = double.Parse(locationToken["latitude"].ToString(), CultureInfo.InvariantCulture);
+                location.Longitude = double.Parse(locationToken["longitude"].ToString(), CultureInfo.InvariantCulture);
+                location.Delta = double.Parse(locationToken["delta"].ToString(), CultureInfo.InvariantCulture);
+                result.Add(location);
+            }
+
+            return result;
+        }
+
         public string GetMessages(double latitude, double longitude)
         {
             string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
-            //string userId = Helpers.CalculateMD5Hash(Guid.NewGuid().ToString());
-            string userId = Guid.NewGuid().ToString().ToUpper();
+            string userId = this.GenerateUserId();
 
             RegisterUser(latitude, longitude, userId, salt);
 
@@ -104,6 +199,75 @@ namespace YikYakDotNet
             url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{user-id}", userId);
+            url = url.Replace("{version}", VERSION);
+            string encodeUrl = url;
+            encodeUrl += salt;
+
+            string hash = Helpers.Encode(encodeUrl, DEVICE_KEY);
+            url = url + "&salt={salt}".Replace("{salt}", salt);
+            url = url + "&hash={hash}".Replace("{hash}", hash);
+            url = BASE_URL + url;
+
+            HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+            request.Method = "GET";
+            request.UserAgent = USER_AGENT;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            return Helpers.ReadWebResponse(response);
+        }
+
+        public string PeekMessages(double latitude, double longitude, string peekId)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+            string userId = this.GenerateUserId();
+
+            RegisterUser(latitude, longitude, userId, salt);
+
+            return PeekMessages(latitude, longitude, userId, peekId, salt);
+        }
+
+        public string PeekMessages(double latitude, double longitude, string userId, string peekId, string salt)
+        {
+            string url = PEEK_MESSAGES_URL;
+            url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-id}", userId);
+            url = url.Replace("{peek-id}", peekId);
+            url = url.Replace("{version}", VERSION);
+            string encodeUrl = url;
+            encodeUrl += salt;
+
+            string hash = Helpers.Encode(encodeUrl, DEVICE_KEY);
+            url = url + "&salt={salt}".Replace("{salt}", salt);
+            url = url + "&hash={hash}".Replace("{hash}", hash);
+            url = BASE_URL + url;
+
+            HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+            request.Method = "GET";
+            request.UserAgent = USER_AGENT;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            return Helpers.ReadWebResponse(response);
+        }
+
+        public string Yaks(double latitude, double longitude, double userLatitude, double userLongitude)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+            string userId = this.GenerateUserId();
+
+            RegisterUser(latitude, longitude, userId, salt);
+
+            return Yaks(latitude, longitude, userId, userLatitude, userLongitude, salt);
+        }
+
+        public string Yaks(double latitude, double longitude, string userId, double userLatitude, double userLongitude, string salt)
+        {
+            string url = YAKS_URL;
+            url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-id}", userId);
+            url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{version}", VERSION);
             string encodeUrl = url;
             encodeUrl += salt;

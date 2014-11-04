@@ -18,17 +18,82 @@ namespace YikYakDotNet
 
         static void Main(string[] args)
         {
-            double latitude = -31.641325;
-            double longitude = -60.718780;
+            // Santa Fe, Argentina
+            //double latitude = -31.641325;
+            //double longitude = -60.718780;
+            // Emerson College
+            double latitude = 42.352087;
+            double longitude = -71.065717;
+            string peekId = "100288";
 
             string messageID = "R/544eb4bd599dada380d88f1748d94";
             LocationPoint knownLocation = new LocationPoint(latitude, longitude);
 
+            //PeekMessages(latitude, longitude, peekId);
+
+            PeekAnywhere(latitude, longitude, latitude, longitude);
+
             //GetYaks(latitude, longitude);
 
-            GetLocationVariations(latitude, longitude, 100);
+            //GetLocations(latitude, longitude);
+
+            //GetLocationVariations(latitude, longitude, 100);
 
             //GetAverageLocationVariations(messageID, knownLocation, 100);
+        }
+
+        private static void PeekAnywhere(double latitude, double longitude, double userLatitude, double userLongitude)
+        {
+            YikYakAPI api = new YikYakAPI();
+
+            try
+            {
+                var res = api.Yaks(latitude, longitude, userLatitude, userLongitude);
+
+                var deserializerSettings = new JsonSerializerSettings()
+                {
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                    DateParseHandling = Newtonsoft.Json.DateParseHandling.None,
+                    DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc
+                };
+
+                JToken token = JsonConvert.DeserializeObject<JObject>(res, deserializerSettings);
+
+                Console.WriteLine(string.Format("Total Results: {0}", token["messages"].Count()));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.ReadLine();
+        }
+
+        private static void PeekMessages(double latitude, double longitude, string peekId)
+        {
+            YikYakAPI api = new YikYakAPI();
+
+            try
+            {
+                var res = api.PeekMessages(latitude, longitude, peekId);
+
+                var deserializerSettings = new JsonSerializerSettings()
+                {
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                    DateParseHandling = Newtonsoft.Json.DateParseHandling.None,
+                    DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc
+                };
+
+                JToken token = JsonConvert.DeserializeObject<JObject>(res, deserializerSettings);
+
+                Console.WriteLine(string.Format("Total Results: {0}", token["messages"].Count()));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.ReadLine();
         }
 
         private static void GetYaks(double latitude, double longitude)
@@ -40,6 +105,47 @@ namespace YikYakDotNet
                 var res = api.GetYaks(latitude, longitude);
 
                 Console.WriteLine(string.Format("Total Results: {0}", res.Count()));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.ReadLine();
+        }
+
+        private static void GetLocations(double latitude, double longitude)
+        {
+            YikYakAPI api = new YikYakAPI();
+
+            try
+            {
+                int totalResults = 0;
+                string fileName = string.Format(@"Locations_{0}.txt", DateTime.Now.ToString("MMddyyyyHHmmss"));
+                FileStream stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write);
+                StreamWriter writer = new StreamWriter(stream);
+
+                var res = api.GetFeaturedLocations(latitude, longitude);
+                totalResults += res.Count;
+
+                foreach (var item in res)
+                {
+                    writer.Write(string.Format("{0}\t\t\t{1}\t\t\t\t{2},{3}\t\t{4}", item.PeekID, item.Name, item.Latitude, item.Longitude, item.Delta));
+                    writer.WriteLine();
+                }
+
+                res = api.GetOtherLocations(latitude, longitude);
+                totalResults += res.Count;
+
+                foreach (var item in res)
+                {
+                    writer.Write(string.Format("{0}\t\t\t{1}\t\t\t\t{2},{3}\t\t{4}", item.PeekID, item.Name, item.Latitude, item.Longitude, item.Delta));
+                    writer.WriteLine();
+                }
+
+                writer.Close();
+
+                Console.WriteLine(string.Format("Total Results: {0}", totalResults));
             }
             catch (Exception ex)
             {

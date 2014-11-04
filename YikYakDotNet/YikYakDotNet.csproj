@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Location.cs" />
     <Compile Include="Entities\RectangleSearchArea.cs" />
     <Compile Include="Entities\Yak.cs" />
     <Compile Include="Helpers.cs" />
