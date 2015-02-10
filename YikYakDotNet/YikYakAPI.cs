@@ -27,13 +27,20 @@ namespace YikYakDotNet
         private const string PEEK_MESSAGES_URL = "/api/getPeekMessages?lat={latitude}&long={longitude}&userID={user-id}&peekID={peek-id}&version={version}";
         private const string YAKS_URL = "/api/yaks?lat={latitude}&long={longitude}&userID={user-id}&userLat={user-latitude}&userLong={user-longitude}&version={version}";
         private const string BASE_URL = "https://us-east-api.yikyakapi.net";
-        private const string USER_AGENT = "Yik Yak/2.1.0.23 CFNetwork/711.1.12 Darwin/14.0.0";
-        private const string DEVICE_KEY = "F7CAFA2F-FE67-4E03-A090-AC7FFF010729";
-        private const string VERSION = "2.1.003";
+        private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; Google Nexus 4 - 4.4.4 - API 19 - 768x1280 Build/KTU84P)";
+        private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
+        private const string VERSION = "2.2.1.10e";
+
+        public YikYakAPI()
+        {
+            if (!this.HasAPIKey)
+            {
+                throw new Exception("Please, request the new API Key");
+            }
+        }
 
         private string GenerateUserId()
         {
-            //return userId = Helpers.CalculateMD5Hash(Guid.NewGuid().ToString());
             return Guid.NewGuid().ToString().ToUpper();
         }
 
@@ -304,6 +311,14 @@ namespace YikYakDotNet
             regRequest.Method = "GET";
             regRequest.UserAgent = USER_AGENT;
             HttpWebResponse regResponse = (HttpWebResponse)regRequest.GetResponse();
+        }
+
+        private bool HasAPIKey
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(DEVICE_KEY);
+            }
         }
     }
 }

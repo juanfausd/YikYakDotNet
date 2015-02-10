@@ -21,19 +21,20 @@ namespace YikYakDotNet
             // Santa Fe, Argentina
             //double latitude = -31.641325;
             //double longitude = -60.718780;
+
             // Emerson College
-            double latitude = 42.352087;
-            double longitude = -71.065717;
+            double latitude = 34.068672;
+            double longitude = -81.096931;
             string peekId = "100288";
 
-            string messageID = "R/544eb4bd599dada380d88f1748d94";
+            string messageID = "R/54701f957bc83c79bbc87535bf0af";
             LocationPoint knownLocation = new LocationPoint(latitude, longitude);
+
+            GetYaks(latitude, longitude);
 
             //PeekMessages(latitude, longitude, peekId);
 
-            PeekAnywhere(latitude, longitude, latitude, longitude);
-
-            //GetYaks(latitude, longitude);
+            //PeekAnywhere(latitude, longitude, latitude, longitude);
 
             //GetLocations(latitude, longitude);
 
