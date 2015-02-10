@@ -11,6 +11,7 @@ Yik Yak is a geographic based chatting application that allows users to anonymou
 The purpose is to provide a tool to other developers that are interested on consuming YikYak data. Specially for those who use .NET.
 
 <b>IMPORTANT: About API Key</b>
+
 In order to use the API, you'll new to request us the API key.
 
 
