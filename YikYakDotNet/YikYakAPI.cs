@@ -27,9 +27,9 @@ namespace YikYakDotNet
         private const string PEEK_MESSAGES_URL = "/api/getPeekMessages?lat={latitude}&long={longitude}&userID={user-id}&peekID={peek-id}&version={version}";
         private const string YAKS_URL = "/api/yaks?lat={latitude}&long={longitude}&userID={user-id}&userLat={user-latitude}&userLong={user-longitude}&version={version}";
         private const string BASE_URL = "https://us-east-api.yikyakapi.net";
-        private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; Google Nexus 4 - 4.4.4 - API 19 - 768x1280 Build/KTU84P)";
+        private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; Nexus 5)";
         private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
-        private const string VERSION = "2.2.1.10e";
+        private const string VERSION = "2.2.1.11e";
 
         public YikYakAPI()
         {
