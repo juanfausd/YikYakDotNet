@@ -31,26 +31,65 @@ namespace YikYakDotNet
         private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
         private const string VERSION = "2.2.1.11e";
 
-        
-        public YikYakAPI()
-        {
-            if (!this.HasAPIKey)
-            {
-                throw new Exception("Please, request the new API Key");
-            }
-        }
-
-        public YikYakAPI(string deviceKey)
+        public YikYakAPI(string deviceKey = DEVICE_KEY)
         {
             this.m_deviceKey = deviceKey;
+
+            if (!HasDeviceKey)
+                throw new ArgumentNullException("Please specify a valid device key.");            
         }
 
+        #region Private Members
+        /// <summary>
+        /// The device key to use when connecting to Yik Yak
+        /// </summary>
         string m_deviceKey;
+        #endregion
 
+        private bool HasDeviceKey
+        {
+            get { return string.IsNullOrEmpty(m_deviceKey) == false; }
+        }
+
+        #region User Management
+        /// <summary>
+        /// Returns a new unique UserId.
+        /// 
+        /// NOTE: 
+        /// This userid must be Registered before it can be used
+        /// with the YikYak API.
+        /// </summary>
+        /// <returns></returns>
         public string GenerateUserId()
         {
             return Guid.NewGuid().ToString().ToUpper();
         }
+        public void RegisterUser(double latitude, double longitude, string userId)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+            RegisterUser(latitude, longitude, userId, salt);
+        }
+        public void RegisterUser(double latitude, double longitude, string userId, string salt)
+        {
+            string regUrl = REGISTER_USER_URL;
+            regUrl = regUrl.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            regUrl = regUrl.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            regUrl = regUrl.Replace("{user-id}", userId);
+            regUrl = regUrl.Replace("{version}", VERSION);
+            string encodeRegUrl = regUrl;
+            encodeRegUrl += salt;
+
+            string regHash = Helpers.Encode(encodeRegUrl, m_deviceKey);
+            regUrl = regUrl + "&salt={salt}".Replace("{salt}", salt);
+            regUrl = regUrl + "&hash={hash}".Replace("{hash}", regHash);
+            regUrl = BASE_URL + regUrl;
+
+            HttpWebRequest regRequest = WebRequest.Create(regUrl) as HttpWebRequest;
+            regRequest.Method = "GET";
+            regRequest.UserAgent = USER_AGENT;
+            HttpWebResponse regResponse = (HttpWebResponse)regRequest.GetResponse();
+        }
+        #endregion
 
         public List<Yak> GetYaks(double latitude, double longitude)
         {
@@ -67,7 +106,7 @@ namespace YikYakDotNet
 
             List<Yak> result = new List<Yak>();
 
-            foreach(JToken messageToken in token["messages"])
+            foreach (JToken messageToken in token["messages"])
             {
                 Yak yak = new Yak();
                 yak.MessageID = messageToken["messageID"].ToString();
@@ -196,7 +235,7 @@ namespace YikYakDotNet
             }
 
             return result;
-        }        
+        }
 
         /// <summary>
         /// Request messages from the Yik Yak API using a generated userid
@@ -213,12 +252,16 @@ namespace YikYakDotNet
             return GetMessages(latitude, longitude, userId, salt);
         }
 
+        /// <summary>
+        /// Get messages using an existing userid
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public string GetMessages(double latitude, double longitude, string userId)
         {
             string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
-
-            //RegisterUser(latitude, longitude, userId, salt);
-
             return GetMessages(latitude, longitude, userId, salt);
         }
 
@@ -318,35 +361,6 @@ namespace YikYakDotNet
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
             return Helpers.ReadWebResponse(response);
-        }
-
-        public void RegisterUser(double latitude, double longitude, string userId, string salt)
-        {
-            string regUrl = REGISTER_USER_URL;
-            regUrl = regUrl.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
-            regUrl = regUrl.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
-            regUrl = regUrl.Replace("{user-id}", userId);
-            regUrl = regUrl.Replace("{version}", VERSION);
-            string encodeRegUrl = regUrl;
-            encodeRegUrl += salt;
-
-            string regHash = Helpers.Encode(encodeRegUrl, m_deviceKey);
-            regUrl = regUrl + "&salt={salt}".Replace("{salt}", salt);
-            regUrl = regUrl + "&hash={hash}".Replace("{hash}", regHash);
-            regUrl = BASE_URL + regUrl;
-
-            HttpWebRequest regRequest = WebRequest.Create(regUrl) as HttpWebRequest;
-            regRequest.Method = "GET";
-            regRequest.UserAgent = USER_AGENT;
-            HttpWebResponse regResponse = (HttpWebResponse)regRequest.GetResponse();
-        }
-
-        private bool HasAPIKey
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(DEVICE_KEY);
-            }
-        }
+        }       
     }
 }
