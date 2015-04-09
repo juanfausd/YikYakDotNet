@@ -31,6 +31,7 @@ namespace YikYakDotNet
         private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
         private const string VERSION = "2.2.1.11e";
 
+        
         public YikYakAPI()
         {
             if (!this.HasAPIKey)
@@ -39,7 +40,14 @@ namespace YikYakDotNet
             }
         }
 
-        private string GenerateUserId()
+        public YikYakAPI(string deviceKey)
+        {
+            this.m_deviceKey = deviceKey;
+        }
+
+        string m_deviceKey;
+
+        public string GenerateUserId()
         {
             return Guid.NewGuid().ToString().ToUpper();
         }
@@ -188,14 +196,28 @@ namespace YikYakDotNet
             }
 
             return result;
-        }
+        }        
 
+        /// <summary>
+        /// Request messages from the Yik Yak API using a generated userid
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns></returns>
         public string GetMessages(double latitude, double longitude)
         {
-            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
             string userId = this.GenerateUserId();
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
 
             RegisterUser(latitude, longitude, userId, salt);
+            return GetMessages(latitude, longitude, userId, salt);
+        }
+
+        public string GetMessages(double latitude, double longitude, string userId)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+
+            //RegisterUser(latitude, longitude, userId, salt);
 
             return GetMessages(latitude, longitude, userId, salt);
         }
@@ -210,7 +232,7 @@ namespace YikYakDotNet
             string encodeUrl = url;
             encodeUrl += salt;
 
-            string hash = Helpers.Encode(encodeUrl, DEVICE_KEY);
+            string hash = Helpers.Encode(encodeUrl, m_deviceKey);
             url = url + "&salt={salt}".Replace("{salt}", salt);
             url = url + "&hash={hash}".Replace("{hash}", hash);
             url = BASE_URL + url;
@@ -244,7 +266,7 @@ namespace YikYakDotNet
             string encodeUrl = url;
             encodeUrl += salt;
 
-            string hash = Helpers.Encode(encodeUrl, DEVICE_KEY);
+            string hash = Helpers.Encode(encodeUrl, m_deviceKey);
             url = url + "&salt={salt}".Replace("{salt}", salt);
             url = url + "&hash={hash}".Replace("{hash}", hash);
             url = BASE_URL + url;
@@ -267,6 +289,12 @@ namespace YikYakDotNet
             return Yaks(latitude, longitude, userId, userLatitude, userLongitude, salt);
         }
 
+        public string Yaks(double latitude, double longitude, string userId, double userLatitude, double userLongitude)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+            return Yaks(latitude, longitude, userId, userLatitude, userLongitude, salt);
+        }
+
         public string Yaks(double latitude, double longitude, string userId, double userLatitude, double userLongitude, string salt)
         {
             string url = YAKS_URL;
@@ -279,7 +307,7 @@ namespace YikYakDotNet
             string encodeUrl = url;
             encodeUrl += salt;
 
-            string hash = Helpers.Encode(encodeUrl, DEVICE_KEY);
+            string hash = Helpers.Encode(encodeUrl, m_deviceKey);
             url = url + "&salt={salt}".Replace("{salt}", salt);
             url = url + "&hash={hash}".Replace("{hash}", hash);
             url = BASE_URL + url;
@@ -302,7 +330,7 @@ namespace YikYakDotNet
             string encodeRegUrl = regUrl;
             encodeRegUrl += salt;
 
-            string regHash = Helpers.Encode(encodeRegUrl, DEVICE_KEY);
+            string regHash = Helpers.Encode(encodeRegUrl, m_deviceKey);
             regUrl = regUrl + "&salt={salt}".Replace("{salt}", salt);
             regUrl = regUrl + "&hash={hash}".Replace("{hash}", regHash);
             regUrl = BASE_URL + regUrl;

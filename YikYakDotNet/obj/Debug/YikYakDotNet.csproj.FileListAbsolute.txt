@@ -1,8 +1,0 @@
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\bin\Debug\YikYakDotNet.exe.config
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\bin\Debug\YikYakDotNet.exe
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\bin\Debug\YikYakDotNet.pdb
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\obj\Debug\YikYakDotNet.csprojResolveAssemblyReference.cache
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\obj\Debug\YikYakDotNet.exe
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\obj\Debug\YikYakDotNet.pdb
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\bin\Debug\Newtonsoft.Json.dll
-C:\Users\JuanAlejandro\Documents\Proyectos\YikYakDotNet\YikYakDotNet\bin\Debug\Newtonsoft.Json.xml

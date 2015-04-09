@@ -43,7 +43,7 @@ namespace YikYakDotNet
             //GetAverageLocationVariations(messageID, knownLocation, 100);
         }
 
-        private static void PeekAnywhere(double latitude, double longitude, double userLatitude, double userLongitude)
+        public static void PeekAnywhere(double latitude, double longitude, double userLatitude, double userLongitude)
         {
             YikYakAPI api = new YikYakAPI();
 
