@@ -33,6 +33,50 @@ namespace YikYakDotNet
             return responseData;
         }
 
+        public static string ReadWebResponse(WebResponse webResponse)
+        {
+            StreamReader responseReader = null;
+            string responseData = "";
+
+            try
+            {
+                responseReader = new StreamReader(webResponse.GetResponseStream());
+                responseData = responseReader.ReadToEnd();
+            }
+            finally
+            {
+                if (responseReader != null)
+                {
+                    responseReader.Close();
+                    responseReader = null;
+                }
+            }
+
+            return responseData;
+        }
+
+        public static async Task<string> ReadWebResponseAsync(WebResponse webResponse)
+        {
+            StreamReader responseReader = null;
+            string responseData = "";
+
+            try
+            {
+                responseReader = new StreamReader(webResponse.GetResponseStream());
+                responseData = await responseReader.ReadToEndAsync();
+            }
+            finally
+            {
+                if (responseReader != null)
+                {
+                    responseReader.Close();
+                    responseReader = null;
+                }
+            }
+
+            return responseData;
+        }
+
         public static double ConvertToUnixTimestamp(DateTime date)
         {
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);

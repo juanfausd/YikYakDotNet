@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using YikYakDotNet.Entities;
 
@@ -286,7 +287,7 @@ namespace YikYakDotNet
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
             return Helpers.ReadWebResponse(response);
-        }
+        }        
 
         public string PeekMessages(double latitude, double longitude, string peekId)
         {
@@ -361,6 +362,6 @@ namespace YikYakDotNet
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
             return Helpers.ReadWebResponse(response);
-        }       
+        }
     }
 }
