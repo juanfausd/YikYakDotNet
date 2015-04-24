@@ -363,5 +363,36 @@ namespace YikYakDotNet
 
             return Helpers.ReadWebResponse(response);
         }
+        
+        public Task<string> YaksAsync(double latitude, double longitude, string userId, double userLatitude, double userLongitude)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+            return YaksAsync(latitude, longitude, userId, userLatitude, userLongitude, salt);
+        }
+
+        public async Task<string> YaksAsync(double latitude, double longitude, string userId, double userLatitude, double userLongitude, string salt)
+        {
+            string url = YAKS_URL;
+            url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-id}", userId);
+            url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{version}", VERSION);
+            string encodeUrl = url;
+            encodeUrl += salt;
+
+            string hash = Helpers.Encode(encodeUrl, m_deviceKey);
+            url = url + "&salt={salt}".Replace("{salt}", salt);
+            url = url + "&hash={hash}".Replace("{hash}", hash);
+            url = BASE_URL + url;
+
+            HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;            
+            request.Method = "GET";
+            request.UserAgent = USER_AGENT;
+            var response = await request.GetResponseAsync();
+
+            return await Helpers.ReadWebResponseAsync(response);
+        }
     }
 }
