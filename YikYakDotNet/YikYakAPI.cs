@@ -26,11 +26,12 @@ namespace YikYakDotNet
         private const string GET_MESSAGES_URL = "/api/getMessages?lat={latitude}&long={longitude}&userID={user-id}&version={version}";
         private const string REGISTER_USER_URL = "/api/registerUser?lat={latitude}&long={longitude}&userID={user-id}&version={version}";
         private const string PEEK_MESSAGES_URL = "/api/getPeekMessages?lat={latitude}&long={longitude}&userID={user-id}&peekID={peek-id}&version={version}";
-        private const string YAKS_URL = "/api/yaks?lat={latitude}&long={longitude}&userID={user-id}&userLat={user-latitude}&userLong={user-longitude}&version={version}";
+        private const string YAKS_URL = "/api/getMessages?lat={latitude}&long={longitude}&userID={user-id}&userLat={user-latitude}&userLong={user-longitude}&version={version}";
         private const string BASE_URL = "https://us-east-api.yikyakapi.net";
-        private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; Nexus 5)";
+        //private const string BASE_URL = "https://us-central-api.yikyakapi.net";
+        private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; XT1080)" + " " + VERSION;
         private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
-        private const string VERSION = "2.2.1.11e";
+        private const string VERSION = "2.6.1";
 
         public YikYakAPI(string deviceKey = DEVICE_KEY)
         {
@@ -77,6 +78,7 @@ namespace YikYakDotNet
             regUrl = regUrl.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             regUrl = regUrl.Replace("{user-id}", userId);
             regUrl = regUrl.Replace("{version}", VERSION);
+            //regUrl = regUrl + "&bc=0";
             string encodeRegUrl = regUrl;
             encodeRegUrl += salt;
 
@@ -89,6 +91,9 @@ namespace YikYakDotNet
             regRequest.Method = "GET";
             regRequest.UserAgent = USER_AGENT;
             HttpWebResponse regResponse = (HttpWebResponse)regRequest.GetResponse();
+
+            var content = Helpers.ReadWebResponse(regResponse);
+            
         }
         #endregion
 
@@ -373,18 +378,22 @@ namespace YikYakDotNet
         public async Task<string> YaksAsync(double latitude, double longitude, string userId, double userLatitude, double userLongitude, string salt)
         {
             string url = YAKS_URL;
+            //string url = GET_MESSAGES_URL;
             url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{user-id}", userId);
             url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
+            //url = url.Replace("{user-latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            //url = url.Replace("{user-longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{version}", VERSION);
+            url = url + "&bc=0";
             string encodeUrl = url;
             encodeUrl += salt;
 
             string hash = Helpers.Encode(encodeUrl, m_deviceKey);
             url = url + "&salt={salt}".Replace("{salt}", salt);
-            url = url + "&hash={hash}".Replace("{hash}", hash);
+            url = url + "&hash={hash}".Replace("{hash}", hash);            
             url = BASE_URL + url;
 
             HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;            
@@ -392,7 +401,9 @@ namespace YikYakDotNet
             request.UserAgent = USER_AGENT;
             var response = await request.GetResponseAsync();
 
-            return await Helpers.ReadWebResponseAsync(response);
+            var content = await Helpers.ReadWebResponseAsync(response);
+
+            return content;
         }
     }
 }
