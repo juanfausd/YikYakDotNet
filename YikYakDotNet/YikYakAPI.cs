@@ -33,9 +33,10 @@ namespace YikYakDotNet
         private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
         private const string VERSION = "2.6.1";
 
-        public YikYakAPI(string deviceKey = DEVICE_KEY)
+        public YikYakAPI(string deviceKey = DEVICE_KEY, string proxyAddress = null)
         {
             this.m_deviceKey = deviceKey;
+            this.m_proxy_address = proxyAddress;
 
             if (!HasDeviceKey)
                 throw new ArgumentNullException("Please specify a valid device key.");            
@@ -46,6 +47,10 @@ namespace YikYakDotNet
         /// The device key to use when connecting to Yik Yak
         /// </summary>
         string m_deviceKey;
+        /// <summary>
+        /// Optional setting that specifies a proxy server to use for all requests
+        /// </summary>
+        string m_proxy_address;
         #endregion
 
         private bool HasDeviceKey
@@ -120,6 +125,10 @@ namespace YikYakDotNet
             HttpWebRequest request = WebRequest.Create(regUrl) as HttpWebRequest;
             request.Method = "GET";
             request.UserAgent = USER_AGENT;
+
+            if (string.IsNullOrEmpty(m_proxy_address) == false)
+                request.Proxy = new WebProxy(m_proxy_address);
+
             //var response = await request.GetResponseAsync();
             //var content = await Helpers.ReadWebResponseAsync(response);
             return request.GetResponseAsync();
@@ -411,10 +420,10 @@ namespace YikYakDotNet
             url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{user-id}", userId);
-            url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
-            url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
-            //url = url.Replace("{user-latitude}", latitude.ToString(CultureInfo.InvariantCulture));
-            //url = url.Replace("{user-longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            //url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
+            //url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{version}", VERSION);
             url = url + "&bc=0";
             string encodeUrl = url;
@@ -428,6 +437,11 @@ namespace YikYakDotNet
             HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;            
             request.Method = "GET";
             request.UserAgent = USER_AGENT;
+
+            // ** Set a proxy if configured
+            if (string.IsNullOrEmpty(m_proxy_address) == false)            
+                request.Proxy = new WebProxy(m_proxy_address);            
+
             var response = await request.GetResponseAsync();
 
             var content = await Helpers.ReadWebResponseAsync(response);
