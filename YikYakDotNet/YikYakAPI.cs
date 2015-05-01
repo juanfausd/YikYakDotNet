@@ -27,8 +27,8 @@ namespace YikYakDotNet
         private const string REGISTER_USER_URL = "/api/registerUser?lat={latitude}&long={longitude}&userID={user-id}&version={version}";
         private const string PEEK_MESSAGES_URL = "/api/getPeekMessages?lat={latitude}&long={longitude}&userID={user-id}&peekID={peek-id}&version={version}";
         private const string YAKS_URL = "/api/getMessages?lat={latitude}&long={longitude}&userID={user-id}&userLat={user-latitude}&userLong={user-longitude}&version={version}";
-        private const string BASE_URL = "https://us-east-api.yikyakapi.net";
-        //private const string BASE_URL = "https://us-central-api.yikyakapi.net";
+        //private const string BASE_URL = "https://us-east-api.yikyakapi.net";
+        private const string BASE_URL = "https://us-central-api.yikyakapi.net";
         private const string USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.4.4; XT1080)" + " " + VERSION;
         private const string DEVICE_KEY = "";   // IMPORTANT: Request the new API KEY
         private const string VERSION = "2.6.1";
