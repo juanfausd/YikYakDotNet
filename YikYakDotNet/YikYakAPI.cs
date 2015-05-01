@@ -420,10 +420,10 @@ namespace YikYakDotNet
             url = url.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{user-id}", userId);
-            //url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
-            //url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
-            url = url.Replace("{user-latitude}", latitude.ToString(CultureInfo.InvariantCulture));
-            url = url.Replace("{user-longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-latitude}", userLatitude.ToString(CultureInfo.InvariantCulture));
+            url = url.Replace("{user-longitude}", userLongitude.ToString(CultureInfo.InvariantCulture));
+            //url = url.Replace("{user-latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            //url = url.Replace("{user-longitude}", longitude.ToString(CultureInfo.InvariantCulture));
             url = url.Replace("{version}", VERSION);
             url = url + "&bc=0";
             string encodeUrl = url;
