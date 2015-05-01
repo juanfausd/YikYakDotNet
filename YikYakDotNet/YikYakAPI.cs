@@ -95,6 +95,35 @@ namespace YikYakDotNet
             var content = Helpers.ReadWebResponse(regResponse);
             
         }
+
+        public Task RegisterUserAsync(double latitude, double longitude, string userId)
+        {
+            string salt = Helpers.ConvertToUnixTimestamp(DateTime.Now).ToString();
+            return RegisterUserAsync(latitude, longitude, userId, salt);
+        }
+        public Task RegisterUserAsync(double latitude, double longitude, string userId, string salt)
+        {
+            string regUrl = REGISTER_USER_URL;
+            regUrl = regUrl.Replace("{latitude}", latitude.ToString(CultureInfo.InvariantCulture));
+            regUrl = regUrl.Replace("{longitude}", longitude.ToString(CultureInfo.InvariantCulture));
+            regUrl = regUrl.Replace("{user-id}", userId);
+            regUrl = regUrl.Replace("{version}", VERSION);
+            //regUrl = regUrl + "&bc=0";
+            string encodeRegUrl = regUrl;
+            encodeRegUrl += salt;
+
+            string regHash = Helpers.Encode(encodeRegUrl, m_deviceKey);
+            regUrl = regUrl + "&salt={salt}".Replace("{salt}", salt);
+            regUrl = regUrl + "&hash={hash}".Replace("{hash}", regHash);
+            regUrl = BASE_URL + regUrl;
+
+            HttpWebRequest request = WebRequest.Create(regUrl) as HttpWebRequest;
+            request.Method = "GET";
+            request.UserAgent = USER_AGENT;
+            //var response = await request.GetResponseAsync();
+            //var content = await Helpers.ReadWebResponseAsync(response);
+            return request.GetResponseAsync();
+        }
         #endregion
 
         public List<Yak> GetYaks(double latitude, double longitude)
